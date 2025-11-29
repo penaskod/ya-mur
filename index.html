@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yağmura - İyi ki Doğdun!</title>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    /* Genel Sayfa Düzeni */
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      /* Arka plan rengi (Dilersen buradaki renk kodlarını değiştirebilirsin) */
+      background: linear-gradient(45deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%);
+      overflow: hidden;
+    }
+
+    /* Kart Tasarımı (Glassmorphism) */
+    .card {
+      background: rgba(255, 255, 255, 0.25);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      padding: 40px;
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+      animation: fadeIn 1.5s ease-in-out;
+    }
+
+    /* Fotoğraf Alanı */
+    .photo-container {
+      width: 150px;
+      height: 150px;
+      margin: 0 auto 20px auto;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 4px solid white;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+
+    .photo-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Yazı Stilleri */
+    h1 {
+      color: #fff;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+      margin-bottom: 10px;
+      font-size: 2.2rem;
+    }
+
+    p {
+      color: #fff;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-bottom: 30px;
+      font-weight: 500;
+    }
+
+    /* Buton Tasarımı */
+    .btn {
+      background-color: white;
+      color: #ff9a9e;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .btn:active {
+      transform: scale(0.95);
+    }
+
+    /* Giriş Animasyonu */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="photo-container">
+    <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Yağmur" id="user-photo">
+  </div>
+
+  <h1>İyi ki Doğdun Yağmur! 🎉</h1>
+
+  <p>
+    Yeni yaşın sana mutluluk, başarı ve güzellikler getirsin.
+    Seninle nice güzel anılara! İyi ki varsın.
+  </p>
+
+  <button class="btn" onclick="celebrate()">Pastayı Kes 🎂</button>
+</div>
+
+<script>
+  // Sayfa ilk açıldığında konfeti patlat
+  window.onload = function() {
+    var duration = 3 * 1000;
+    var animationEnd = Date.now() + duration;
+    var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+    function randomInOut(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    var interval = setInterval(function() {
+      var timeLeft = animationEnd - Date.now();
+
+      if (timeLeft <= 0) {
+        return clearInterval(interval);
+      }
+
+      var particleCount = 50 * (timeLeft / duration);
+      confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInOut(0.1, 0.3), y: Math.random() - 0.2 } }));
+      confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInOut(0.7, 0.9), y: Math.random() - 0.2 } }));
+    }, 250);
+  };
+
+  // Butona basınca konfeti patlat
+  function celebrate() {
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 }
+    });
+  }
+</script>
+</body>
+</html>
