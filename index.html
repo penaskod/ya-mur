@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yağmura Özel - Doğum Günü</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    /* --- AYARLAR --- */
+    :root {
+      --primary: #ff4757;
+      --secondary: #2ed573;
+      --text-dark: #2f3542;
+      --text-light: #57606f;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      color: var(--text-dark);
+      overflow-x: hidden;
+
+      /* --- ARKA PLAN (ASLA BEYAZ DEĞİL) --- */
+      /* Çok canlı, sürekli değişen Gökkuşağı Gradyanı */
+      background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab, #ff9f43);
+      background-size: 400% 400%;
+      animation: gradientMove 10s ease infinite;
+    }
+
+    /* Renklerin yer değiştirmesi */
+    @keyframes gradientMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* --- HEADER (İnce Cam) --- */
+    header {
+      background: rgba(255, 255, 255, 0.2); /* Çok şeffaf */
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 1rem 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 100;
+    }
+
+    .back-btn {
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 20px;
+      background: rgba(0, 0, 0, 0.2);
+      transition: 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .back-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .header-title {
+      color: white;
+      font-weight: 700;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      letter-spacing: 1px;
+    }
+
+    /* --- ORTA ALAN --- */
+    .main-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      perspective: 1000px; /* 3D hissi için */
+    }
+
+    /* --- KART TASARIMI --- */
+    .game-card {
+      position: relative;
+      /* Kartın arkası şeffaf ki arka planın rengi belli olsun */
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(25px); /* Buzlu cam efekti */
+      -webkit-backdrop-filter: blur(25px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+      width: 100%;
+      max-width: 380px;
+      border-radius: 24px;
+      text-decoration: none;
+      overflow: hidden;
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .game-card:hover {
+      transform: translateY(-10px) scale(1.02);
+      box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    /* Kart Üst Görseli */
+    .card-banner {
+      height: 150px;
+      background: linear-gradient(135deg, #ff9a9e 0%, #ff6b6b 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .card-emoji {
+      font-size: 4.5rem;
+      filter: drop-shadow(0 5px 15px rgba(0,0,0,0.2));
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+
+    .tag {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: white;
+      color: var(--primary);
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    /* Kart Yazıları */
+    .card-content {
+      padding: 30px;
+      text-align: center;
+      color: white; /* Yazılar beyaz olsun ki renkli arka planda okunsun */
+    }
+
+    .card-content h2 {
+      margin: 0 0 10px;
+      font-size: 1.8rem;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .card-content p {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 1rem;
+      margin-bottom: 30px;
+    }
+
+    /* Buton */
+    .play-btn {
+      display: inline-block;
+      background: white;
+      color: var(--primary);
+      padding: 14px 35px;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 1rem;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      transition: 0.3s;
+    }
+
+    .game-card:hover .play-btn {
+      background: var(--text-dark);
+      color: white;
+      transform: scale(1.05);
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="ydg/index.html" class="back-btn">
+    ← Ana Sayfa
+  </a>
+  <span class="header-title">DOĞUM GÜNÜ MODU 🎂</span>
+</header>
+
+<div class="main-container">
+
+  <a href="ydg/index.html" class="game-card" id="birthdayCard">
+    <div class="card-banner">
+      <div class="tag">ÖZEL</div>
+      <div class="card-emoji">😼</div>
+    </div>
+    <div class="card-content">
+      <h2>Yağmur'a</h2>
+      <p>Bugün senin günün! Sürprize hazır mısın?</p>
+      <div class="play-btn">Ateşle 🚀</div>
+    </div>
+  </a>
+
+</div>
+
+<footer>
+  <p>2025 | Yağmur İçin Özel Hazırlandı 🎉</p>
+</footer>
+
+<script>
+  // Sayfa Yüklendiğinde
+  window.onload = function() {
+    patlat();
+  };
+
+  // Karta tıklandığında veya buton üzerine gelindiğinde de patlasın
+  document.querySelector('.game-card').addEventListener('mouseenter', function() {
+    // Küçük bir konfeti daha at
+    confetti({
+      particleCount: 50,
+      spread: 60,
+      origin: { y: 0.7 }
+    });
+  });
+
+  // ANA PATLAMA FONKSİYONU
+  function patlat() {
+    var duration = 3000; // 3 saniye sürsün
+    var end = Date.now() + duration;
+
+    // Gerçekçi patlama efekti (Sağ ve Sol köşelerden)
+    (function frame() {
+      // İki taraftan fırlat
+      confetti({
+        particleCount: 5,
+        angle: 60,
+        spread: 55,
+        origin: { x: 0, y: 0.8 }, // Sol alt
+        colors: ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff']
+      });
+      confetti({
+        particleCount: 5,
+        angle: 120,
+        spread: 55,
+        origin: { x: 1, y: 0.8 }, // Sağ alt
+        colors: ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff']
+      });
+
+      if (Date.now() < end) {
+        requestAnimationFrame(frame);
+      }
+    }());
+  }
+</script>
+
+</body>
+</html>
