@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Doğum Günün Kutlu Olsun! 🎂</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Poppins:wght@300;400;600&family=Courier+New&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    /* --- GENEL AYARLAR --- */
+    body {
+      margin: 0; min-height: 100vh; font-family: 'Poppins', sans-serif;
+      color: #fff; text-align: center; display: flex; align-items: center; justify-content: center;
+      background: #000; overflow: hidden; user-select: none;
+      /* Özel fare imleci */
+      cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><text y="20" font-size="20">🪄</text></svg>') 0 20, auto;
+    }
+
+    /* Parti Modu Arka Planı */
+    body.party-mode {
+      background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+    }
+
+    /* Yağmurlu Mod Arka Planı */
+    body.rainy-mode {
+      background: linear-gradient(to bottom, #203a43, #2c5364);
+      transition: background 1s;
+    }
+
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* --- VİDEO EKRANI --- */
+    #intro-container {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: black; z-index: 9999;
+      display: flex; justify-content: center; align-items: center;
+    }
+    #introVideo { width: 100%; height: 100%; object-fit: cover; }
+    #startVideoBtn { position: absolute; z-index: 10001; }
+    #skipIntroBtn {
+      position: absolute; bottom: 20px; right: 20px;
+      background: rgba(255,255,255,0.2); border: 1px solid white;
+      color: white; padding: 8px 15px; border-radius: 20px;
+      cursor: pointer; z-index: 10000; font-size: 0.8em;
+    }
+
+    /* --- KART TASARIMI --- */
+    .card {
+      width: 90%; max-width: 850px;
+      background: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.18);
+      padding: 30px; position: relative; z-index: 10;
+      display: none; opacity: 0; transition: opacity 1s;
+    }
+    .card.visible { display: block; opacity: 1; animation: popUpCard 1s ease-out; }
+    @keyframes popUpCard { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    h1, h2 { font-family: 'Dancing Script', cursive; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
+    h1 { font-size: 3em; margin-bottom: 5px; }
+
+    button {
+      padding: 12px 35px; border: none; border-radius: 50px;
+      font-weight: bold; font-size: 1.1em; margin: 10px;
+      cursor: pointer; transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      font-family: 'Poppins', sans-serif;
+    }
+    .yes-btn { background: #fff; color: #e73c7e; }
+    .yes-btn:hover { transform: scale(1.1); background: #ffeef5; }
+    .no-btn { background: #ff4757; color: white; position: relative; z-index: 100; transition: top 0.2s, left 0.2s; }
+
+    .hidden { display: none !important; }
+
+    img.main {
+      max-width: 300px; width: 80%; border-radius: 15px;
+      margin: 15px auto; box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      border: 4px solid white;
+    }
+
+    /* --- GÜLLER & İSTATİSTİK --- */
+    .rose-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-top: 20px; }
+    .rose-card { background: rgba(255,255,255,0.9); padding: 10px; border-radius: 15px; color: #333; animation: popIn 0.5s forwards; opacity: 0; }
+    .rose-card img { width: 100%; height: 120px; object-fit: cover; border-radius: 10px; }
+    @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    .stats-list { text-align: left; margin: 20px 0; }
+    .stat-item {
+      background: rgba(255, 255, 255, 0.95); color: #333;
+      margin-bottom: 15px; padding: 15px; border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      transform: translateX(-20px); opacity: 0;
+      transition: all 0.5s ease; border-left: 6px solid #e73c7e;
+    }
+    .stat-item.show { transform: translateX(0); opacity: 1; }
+    .stat-label { font-size: 0.9em; color: #555; display: block; margin-bottom: 5px; font-weight: 600; }
+    .stat-value { font-size: 1.4em; font-weight: bold; color: #d81b60; font-family: 'Courier New', monospace; }
+
+    /* --- PASTA --- */
+    .cake-container { margin: 40px auto; position: relative; width: 200px; height: 200px; }
+    .cake-body { width: 150px; height: 100px; background: #f8a5c2; border-radius: 10px 10px 0 0; position: absolute; bottom: 0; left: 25px; box-shadow: inset -10px -10px rgba(0,0,0,0.1); }
+    .cake-layer { width: 100%; height: 30px; background: #fff; position: absolute; top: 30px; box-shadow: 0 4px 5px rgba(0,0,0,0.1); }
+    .candle { width: 20px; height: 60px; background: repeating-linear-gradient(45deg, #fff, #fff 5px, #74b9ff 5px, #74b9ff 10px); position: absolute; bottom: 100px; left: 90px; }
+    .flame {
+      width: 20px; height: 35px; background: #ffaa00;
+      border-radius: 50% 50% 20% 20%; position: absolute;
+      bottom: 160px; left: 90px;
+      box-shadow: 0 0 10px #ffaa00, 0 0 20px #ffaa00, 0 0 40px #ffaa00;
+      animation: flicker 0.1s infinite; transform-origin: center bottom;
+    }
+    @keyframes flicker { 0% { transform: scale(1); } 50% { transform: scale(1.1) rotate(2deg); } 100% { transform: scale(0.9) rotate(-2deg); } }
+
+    .blow-meter { width: 80%; height: 20px; background: rgba(255,255,255,0.3); border-radius: 10px; margin: 20px auto; overflow: hidden; border: 2px solid white; }
+    .blow-fill { height: 100%; width: 0%; background: #badc58; transition: width 0.1s; }
+
+    /* --- EMOJİ KRİSTAL KÜRE --- */
+    .emoji-crystal-container {
+      position: relative; width: 300px; height: 300px;
+      margin: 20px auto; display: flex; justify-content: center; align-items: center;
+      animation: floatEmoji 3s ease-in-out infinite;
+    }
+    .emoji-ball { font-size: 250px; filter: drop-shadow(0 0 30px rgba(162, 88, 255, 0.9)); z-index: 1; }
+    @keyframes floatEmoji { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+
+    .prophecy-text-container {
+      position: absolute; width: 80%; z-index: 2; text-align: center;
+      background: rgba(0,0,0,0.4); padding: 15px; border-radius: 20px;
+      backdrop-filter: blur(3px); border: 1px solid rgba(255,255,255,0.2);
+    }
+    .prophecy-text {
+      font-family: 'Dancing Script', cursive; font-size: 1.4em;
+      color: #fff; text-shadow: 0 2px 4px black;
+      opacity: 0; transition: opacity 2s;
+    }
+    .prophecy-text.reveal { opacity: 1; }
+
+    /* --- DİLEK FENERLERİ --- */
+    .lantern {
+      position: fixed; bottom: -100px; width: 40px; height: 60px;
+      background: linear-gradient(to bottom, #ff9966, #ff5e62);
+      border-radius: 5px 5px 20px 20px; box-shadow: 0 0 20px #ff9966;
+      opacity: 0.8; z-index: 1; animation: floatUp linear forwards;
+    }
+    .lantern::after { content: ''; position: absolute; bottom: -5px; left: 10px; width: 20px; height: 5px; background: rgba(0,0,0,0.3); }
+    @keyframes floatUp { 0% { transform: translateY(0) rotate(0deg); opacity: 0; } 10% { opacity: 0.9; } 100% { transform: translateY(-120vh) rotate(10deg); opacity: 0; } }
+
+    /* --- KASA & FİNAL --- */
+    .vault-input { padding: 15px; border-radius: 30px; border: none; width: 70%; text-align: center; font-size: 1.2em; margin-top: 15px; outline: none; }
+    .shake { animation: shake 0.5s; }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 25%, 75% { transform: translateX(-10px); } 50% { transform: translateX(10px); } }
+
+    /* --- POLAROID --- */
+    .polaroid-container { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-top: 20px; perspective: 1000px; }
+    .polaroid { width: 180px; height: 240px; background: transparent; cursor: pointer; transform: rotate(-5deg); transition: transform 0.3s; }
+    .polaroid:nth-child(even) { transform: rotate(5deg); }
+    .polaroid:hover { transform: scale(1.1) rotate(0deg); z-index: 20; }
+
+    .polaroid-inner {
+      position: relative; width: 100%; height: 100%; text-align: center;
+      transition: transform 0.6s; transform-style: preserve-3d;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3); background: white;
+      padding: 10px; box-sizing: border-box;
+    }
+    .polaroid.flipped .polaroid-inner { transform: rotateY(180deg); }
+
+    .polaroid-front, .polaroid-back {
+      position: absolute; width: 100%; height: 100%;
+      backface-visibility: hidden; top: 0; left: 0; padding: 10px; box-sizing: border-box;
+    }
+    .polaroid-front img { width: 100%; height: 160px; object-fit: cover; border: 1px solid #ddd; margin-top: 5px; }
+    .polaroid-back {
+      transform: rotateY(180deg); background: #fffbe7; color: #333;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Dancing Script', cursive; font-size: 1.2em; border: 1px solid #eee;
+    }
+    .caption { font-family: 'Dancing Script', cursive; color: #333; font-size: 1.1em; margin-top: 5px; }
+
+    .letter-box {
+      background: rgba(255, 255, 255, 0.95); padding: 20px; border-radius: 10px;
+      font-family: 'Courier New', monospace; color: #333; font-size: 1em;
+      line-height: 1.5; text-align: left; min-height: 120px; margin-top: 25px;
+      border-left: 5px solid #e73c7e;
+    }
+    .whatsapp-btn {
+      display: inline-block; background: #25D366; color: white; padding: 10px 20px;
+      border-radius: 50px; text-decoration: none; font-weight: bold; margin-top: 20px;
+      animation: pulse 2s infinite;
+    }
+    .whatsapp-btn:hover { transform: scale(1.1); background: #128C7E; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(37, 211, 102, 0); } 100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); } }
+
+    .music-control {
+      position: fixed; bottom: 20px; right: 20px;
+      background: rgba(255,255,255,0.4); padding: 10px; border-radius: 50%;
+      cursor: pointer; z-index: 200; font-size: 24px; display: none;
+    }
+
+    .rain-drop {
+      position: fixed; top: -20px; width: 2px; height: 15px;
+      background: rgba(255, 255, 255, 0.5); pointer-events: none; z-index: 5;
+      animation: rainFall 1s linear infinite;
+    }
+    @keyframes rainFall { to { transform: translateY(100vh); } }
+
+    /* Mikrofon İzin Uyarısı */
+    #micPermissionMsg { font-size: 0.8em; color: #ffebee; margin-top: 5px; display: none; }
+  </style>
+</head>
+<body>
+
+<div id="intro-container">
+  <video id="introVideo" playsinline preload="auto">
+    <source src="Mystical_Light_Burst_From_Door.mp4" type="video/mp4">
+  </video>
+  <button id="startVideoBtn" class="yes-btn">Sürprizi Başlat! 🎬</button>
+  <button id="skipIntroBtn">Geç >></button>
+</div>
+
+<div class="card" id="mainCard">
+  <div id="screen1">
+    <h1>🎉 Sürpriz!</h1>
+    <h2>Doğum Günün Kutlu Olsun!</h2>
+    <p>Kapılar açıldı... Hazır mısın? 😎</p>
+    <div style="height: 80px; display: flex; justify-content: center; align-items: center;">
+      <button id="yesBtn" class="yes-btn">EVET! 🎁</button>
+      <button id="noBtn" class="no-btn">Yok 😴</button>
+    </div>
+  </div>
+
+  <div id="roseScreen" class="hidden">
+    <h2>🌹 Güllerini Topla!</h2>
+    <img id="roseImage" class="main" src="" alt="Gül">
+    <p id="roseCounter" style="font-weight:bold; font-size:1.2em;">1 / 5</p>
+    <button id="takeRoseBtn" class="yes-btn">Gülü Al 💖</button>
+  </div>
+
+  <div id="meaningScreen" class="hidden">
+    <h2>💐 Güllerin Anlamı 💐</h2>
+    <div class="rose-grid" id="roseGrid"></div>
+    <br><button id="goToStatsBtn" class="yes-btn">Devam Et 📊</button>
+  </div>
+
+  <div id="statsScreen" class="hidden">
+    <h2>📋 Arkadaşlık Raporu</h2>
+    <div class="stats-list">
+      <div class="stat-item" id="stat1"><span class="stat-label">Bugüne kadar birbirimizi zorbalama süremiz:</span><span class="stat-value" id="count1">0</span></div>
+      <div class="stat-item" id="stat2"><span class="stat-label">Boğuştuğumuz + dövüştüğümüz anılar:</span><span class="stat-value" id="count2">0</span></div>
+      <div class="stat-item" id="stat3"><span class="stat-label">Birlikte yenilen yemek + içilen çay:</span><span class="stat-value" id="count3">0</span></div>
+      <div class="stat-item" id="stat4"><span class="stat-label">Bugüne kadar edilen sohbetler + dedikodular:</span><span class="stat-value" id="count4">0</span></div>
+    </div>
+    <button id="goToCakeBtn" class="yes-btn">Pastaya Geç 🎂</button>
+  </div>
+
+  <div id="cakeScreen" class="hidden">
+    <h2>🎂 Dileğini Tut!</h2>
+    <p>Mumu söndürmek için <b>MİKROFONA ÜFLE!</b> 🎤💨<br>(veya butona basılı tut)</p>
+
+    <div class="cake-container">
+      <div class="candle"></div><div id="flame" class="flame"></div>
+      <div class="cake-body"><div class="cake-layer"></div></div>
+    </div>
+
+    <div class="blow-meter"><div id="blowFill" class="blow-fill"></div></div>
+
+    <button id="enableMicBtn" class="yes-btn" style="background:#23a6d5; color:white;">🎤 Mikrofonu Aç</button>
+    <div id="micPermissionMsg">Lütfen izin ver...</div>
+
+    <button id="blowBtn" class="yes-btn"
+            onmousedown="startBlowing()" onmouseup="stopBlowing()" onmouseleave="stopBlowing()"
+            ontouchstart="startBlowing()" ontouchend="stopBlowing()">
+      💨 Elle Üfle (Yedek)
+    </button>
+  </div>
+
+  <div id="crystalScreen" class="hidden">
+    <h2>🔮 Büyü Akademisi Kehaneti</h2>
+    <p>Bakalım yeni yaşında seni neler bekliyor?</p>
+    <div class="emoji-crystal-container">
+      <div class="emoji-ball">🔮</div>
+      <div class="prophecy-text-container">
+        <div id="prophecyText" class="prophecy-text">Gelecek yükleniyor...</div>
+      </div>
+    </div>
+    <button id="goToVaultBtn" class="yes-btn hidden">Kehaneti Kabul Et ✨</button>
+  </div>
+
+  <div id="vaultScreen" class="hidden">
+    <h2>🔐 Gizli Kasa</h2>
+    <p>Hediyeye ulaşmak için son bir şifre!</p>
+    <div style="font-size: 4em; margin: 10px;">🔒</div>
+    <p style="font-style: italic; font-size: 1.1em;">"Boşluğu tamamla: 'bugün hava ........'"</p>
+    <input type="text" id="vaultInput" class="vault-input" placeholder="Cevabı buraya yaz...">
+    <br><br><button id="unlockBtn" class="yes-btn">Kilidi Aç 🔓</button>
+    <p id="errorMsg" style="color: #ffeb3b; display: none; font-weight: bold; margin-top:10px;">Yanlış cevap! 🌧️</p>
+  </div>
+
+  <div id="finalScreen" class="hidden">
+    <h1>🎂 İyi ki Doğdun!</h1>
+    <div class="polaroid-container">
+      <div class="polaroid" onclick="this.classList.toggle('flipped')">
+        <div class="polaroid-inner">
+          <div class="polaroid-front"><img src="a.jpg" alt="Anı 1"><div class="caption">Bir Yıl Önce (Çevir)</div></div>
+          <div class="polaroid-back">"Çok aşkla bakıyorsun ban haa! 🤣"</div>
+        </div>
+      </div>
+      <div class="polaroid" onclick="this.classList.toggle('flipped')">
+        <div class="polaroid-inner">
+          <div class="polaroid-front"><img src="b.jpg" alt="Anı 2"><div class="caption">Komik Anlar (Çevir)</div></div>
+          <div class="polaroid-back">"Yok canım, ikimiz de çok severiz kamera falan"</div>
+        </div>
+      </div>
+      <div class="polaroid" onclick="this.classList.toggle('flipped')">
+        <div class="polaroid-inner">
+          <div class="polaroid-front"><img src="c.jpg" alt="Anı 3"><div class="caption">En Sevdiğim (Çevir)</div></div>
+          <div class="polaroid-back">"Yok kardeş biz düzgün fotoğraf çekinemiyoruz ama böylesi daha güzel ❤️"</div>
+        </div>
+      </div>
+    </div>
+    <div class="letter-box" id="typewriterText"></div>
+    <a href="https://wa.me/?text=İnanamıyorum%20çok%20güzel%20olmuş!%20Ağlıyorum%20şu%20an...%20😭❤️" target="_blank" class="whatsapp-btn">💬 Bana Ağladığını Yaz</a>
+  </div>
+</div>
+
+<div class="music-control" id="musicCtrl" onclick="toggleMusic()">🎵</div>
+<audio id="bgMusic" loop><source src="muzik.mp3" type="audio/mpeg"></audio>
+
+<script>
+  // --- FARE EFEKTİ ---
+  document.addEventListener('mousemove', function(e) { createSparkle(e.pageX, e.pageY); });
+  function createSparkle(x, y) {
+    const sparkle = document.createElement('div');
+    sparkle.innerText = ['✨', '⭐', '💫'][Math.floor(Math.random() * 3)];
+    sparkle.style.position = 'absolute'; sparkle.style.left = x + 'px'; sparkle.style.top = y + 'px';
+    sparkle.style.fontSize = (Math.random() * 10 + 10) + 'px'; sparkle.style.pointerEvents = 'none';
+    sparkle.style.opacity = '1'; sparkle.style.zIndex = '99999'; sparkle.style.transition = 'top 1s, opacity 1s';
+    document.body.appendChild(sparkle);
+    setTimeout(() => { sparkle.style.top = (y + 50) + 'px'; sparkle.style.opacity = '0'; }, 50);
+    setTimeout(() => sparkle.remove(), 1000);
+  }
+
+  // --- VERİLER ---
+  const roses = [
+    {src:"k.jpg", name:"Kırmızı Gül", meaning:"Seni Seviyorum"},
+    {src:"p.jpg", name:"Pembe Gül", meaning:"Sana Hayranım"},
+    {src:"be.jpg", name:"Beyaz Gül", meaning:"Saf Güzellik"},
+    {src:"t.jpg", name:"Turuncu Gül", meaning:"Güven"},
+    {src:"s.jpg", name:"Sarı Gül", meaning:"Dostluk"}
+  ];
+
+  const myMessage = "La artist, \n\nBirlikte güldüğümüz, eğlendiğimiz, saçmaladığımız her an benim için çok kıymetli. \n\nYeni yaşında hayallerindeki her şeye kavuşmanı diliyorum, Umarım her zaman ne istiyorsan onu yaparsın ve her şey sen nasıl istiyorsan öyle olur, hayatın her zaman kendin kadar güzel olur.\n Ve yine umarıma yaşlanıp huysuz bir nine olduğunda bile hala zorbalamaktan en keyif aldığın kişi ben olurum, umarım birbirimizin kardeşliğini hiç kaybetmiyiz. \n\nİyi ki varsın, iyi ki doğdun! 🎂❤️";
+
+  const prophecies = [
+    "Bu yıl başına büyük bir aşk ve 3 kilo tatlı düşecek! 🍫❤️",
+    "Kristal küre diyor ki: 'Bu sene dedikodu stokların %200 artacak!' 🤫",
+    "Tebrikler! 'Huysuz Ama Tatlı Nine Adayları' listesine giriş yaptın. 👵✨",
+    "Yakında çok istediğin o şey olacak... (Belki bir kedi?) 🐱",
+    "Bu yıl şansın o kadar açık ki, yanlışlıkla zengin olabilirsin! 💸"
+  ];
+
+  // --- DOM ELEMENTLERİ ---
+  const screen1 = document.getElementById("screen1"), roseScreen = document.getElementById("roseScreen"), meaningScreen = document.getElementById("meaningScreen"), statsScreen = document.getElementById("statsScreen"), cakeScreen = document.getElementById("cakeScreen"), crystalScreen = document.getElementById("crystalScreen"), vaultScreen = document.getElementById("vaultScreen"), finalScreen = document.getElementById("finalScreen");
+  const introVideo = document.getElementById("introVideo"), introContainer = document.getElementById("intro-container"), startVideoBtn = document.getElementById("startVideoBtn"), skipIntroBtn = document.getElementById("skipIntroBtn"), mainCard = document.getElementById("mainCard");
+  const bgMusic = document.getElementById("bgMusic"), musicCtrl = document.getElementById("musicCtrl"), roseImage = document.getElementById("roseImage"), roseGrid = document.getElementById("roseGrid"), noBtn = document.getElementById("noBtn");
+  let roseIndex = 0;
+
+  // --- VİDEO ---
+  startVideoBtn.onclick = () => {
+    startVideoBtn.style.display = "none";
+    // Video başlatılıyor, hata olursa konsola yazılır.
+    introVideo.play().catch(e => console.log("Video oynatma hatası:", e));
+  };
+  introVideo.onended = () => startApp();
+  skipIntroBtn.onclick = () => { introVideo.pause(); startApp(); };
+
+  function startApp() {
+    introContainer.style.transition = "opacity 1s"; introContainer.style.opacity = 0;
+    setTimeout(() => {
+      introContainer.style.display = "none";
+      document.body.classList.add("party-mode");
+      mainCard.classList.add("visible");
+      musicCtrl.style.display = "block";
+      bgMusic.play().catch(e => console.log("Müzik çalma hatası:", e));
+    }, 1000);
+  }
+
+  // --- AKIŞ ---
+  document.getElementById("yesBtn").onclick = () => { screen1.classList.add("hidden"); roseScreen.classList.remove("hidden"); roseImage.src = roses[0].src; };
+  noBtn.addEventListener("mouseover", () => { moveButton(); }); noBtn.addEventListener("click", () => moveButton());
+  function moveButton() { noBtn.style.position = "fixed"; noBtn.style.left = Math.random() * (window.innerWidth - 100) + "px"; noBtn.style.top = Math.random() * (window.innerHeight - 50) + "px"; }
+
+  document.getElementById("takeRoseBtn").onclick = (e) => {
+    createSparkle(e.clientX, e.clientY); roseIndex++;
+    if(roseIndex < roses.length) {
+      roseImage.style.opacity = 0;
+      setTimeout(() => {
+        roseImage.src = roses[roseIndex].src;
+        roseImage.style.opacity = 1;
+        document.getElementById("roseCounter").innerText = `${roseIndex + 1} / ${roses.length}`;
+      }, 300);
+    }
+    else { roseScreen.classList.add("hidden"); showMeanings(); }
+  };
+
+  function showMeanings() {
+    meaningScreen.classList.remove("hidden");
+    roseGrid.innerHTML = "";
+    roses.forEach((r, i) => {
+      let d = document.createElement("div");
+      d.className = "rose-card";
+      d.style.animationDelay = (i * 0.2) + "s";
+      d.innerHTML = `<img src="${r.src}"><div style="margin-top:8px;font-weight:bold;color:#e73c7e">${r.name}</div><div>${r.meaning}</div>`;
+      roseGrid.appendChild(d);
+    });
+  }
+
+  document.getElementById("goToStatsBtn").onclick = () => {
+    meaningScreen.classList.add("hidden");
+    statsScreen.classList.remove("hidden");
+    setTimeout(()=>document.getElementById("stat1").classList.add("show"),100);
+    setTimeout(()=>document.getElementById("stat2").classList.add("show"),300);
+    setTimeout(()=>document.getElementById("stat3").classList.add("show"),500);
+    setTimeout(()=>document.getElementById("stat4").classList.add("show"),700);
+    startCounters();
+  };
+
+  function startCounters() {
+    animateValue("count1", 0, 5000, 2000, "+ Saat 😈");
+    animateValue("count2", 0, 999, 2000, " +Sonsuz ∞");
+    animateValue("count3", 0, 2, 1500, " Milyon Milyar 🍔☕");
+    animateValue("count4", 0, 2024, 2500, " Sayılamadı... 😶", true);
+  }
+
+  function animateValue(id, start, end, duration, suffix, replaceAll=false) {
+    const obj = document.getElementById(id);
+    let startTimestamp = null;
+    const step = (timestamp) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      let currentVal = Math.floor(progress * (end - start) + start);
+      if(replaceAll && progress >= 1) {
+        obj.innerHTML = suffix.trim();
+      } else {
+        obj.innerHTML = currentVal + (progress >= 1 ? suffix : "");
+      }
+      if (progress < 1) window.requestAnimationFrame(step);
+    };
+    window.requestAnimationFrame(step);
+  }
+
+  document.getElementById("goToCakeBtn").onclick = () => { statsScreen.classList.add("hidden"); cakeScreen.classList.remove("hidden"); };
+
+  // --- MİKROFON VE ÜFLEME MANTIĞI ---
+  let blowLevel = 0;
+  let blowInterval;
+  const flame = document.getElementById("flame");
+  const blowFill = document.getElementById("blowFill");
+  let audioContext;
+  let microphone;
+  let analyser;
+
+  document.getElementById("enableMicBtn").onclick = async function() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      microphone = audioContext.createMediaStreamSource(stream);
+      analyser = audioContext.createAnalyser();
+      analyser.fftSize = 256;
+      microphone.connect(analyser);
+
+      document.getElementById("micPermissionMsg").style.display = "block";
+      document.getElementById("micPermissionMsg").innerText = "Mikrofon aktif! Şimdi üfle! 💨";
+      document.getElementById("enableMicBtn").style.display = "none";
+
+      detectBlow();
+    } catch (err) {
+      alert("Mikrofon izni verilmedi veya tarayıcı desteklemiyor. Lütfen 'Elle Üfle' butonunu kullanın.");
+      console.error(err);
+    }
+  };
+
+  function detectBlow() {
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+    function analyze() {
+      analyser.getByteFrequencyData(dataArray);
+      let sum = 0;
+      for(let i = 0; i < dataArray.length; i++) { sum += dataArray[i]; }
+      let average = sum / dataArray.length;
+      if (average > 40) { increaseBlow(); } else { decreaseBlow(); }
+      if (blowLevel < 100) requestAnimationFrame(analyze);
+    }
+    analyze();
+  }
+
+  function increaseBlow() { blowLevel += 1.5; if(blowLevel > 100) blowLevel = 100; updateCandleUI(); if (blowLevel >= 100) finishBlowing(); }
+  function decreaseBlow() { if(blowLevel > 0) blowLevel -= 0.5; updateCandleUI(); }
+  function updateCandleUI() {
+    blowFill.style.width = blowLevel + "%";
+    flame.style.opacity = 1 - (blowLevel / 100);
+    let shake = blowLevel > 0 ? 10 : 0;
+    flame.style.transform = `scale(${1 - blowLevel/200}) rotate(${Math.random()*shake - shake/2}deg)`;
+  }
+
+  function startBlowing() { blowInterval = setInterval(() => { increaseBlow(); }, 50); }
+  function stopBlowing() { clearInterval(blowInterval); let decay = setInterval(() => { if(blowLevel > 0) { blowLevel -= 2; updateCandleUI(); } else { clearInterval(decay); } }, 50); }
+
+  function finishBlowing() {
+    if(audioContext && audioContext.state !== 'closed') audioContext.close();
+    clearInterval(blowInterval);
+    flame.style.display = "none";
+    createSparkle(window.innerWidth/2, window.innerHeight/2);
+
+    setTimeout(() => {
+      cakeScreen.classList.add("hidden");
+      showCrystalBall();
+    }, 1500);
+  }
+
+  // --- KRİSTAL KÜRE ---
+  function showCrystalBall() {
+    crystalScreen.classList.remove("hidden");
+    const prophecyEl = document.getElementById("prophecyText");
+    const btn = document.getElementById("goToVaultBtn");
+    const randomProphecy = prophecies[Math.floor(Math.random() * prophecies.length)];
+
+    setTimeout(() => {
+      prophecyEl.innerText = randomProphecy;
+      prophecyEl.classList.add("reveal");
+      btn.classList.remove("hidden");
+    }, 2000);
+  }
+
+  document.getElementById("goToVaultBtn").onclick = () => {
+    crystalScreen.classList.add("hidden");
+    vaultScreen.classList.remove("hidden");
+    document.body.classList.remove("party-mode");
+    document.body.classList.add("rainy-mode");
+    startRain();
+  };
+
+  // --- YAĞMUR & KASA ---
+  let rainInterval;
+  function startRain() {
+    rainInterval = setInterval(() => {
+      const drop = document.createElement("div"); drop.className = "rain-drop";
+      drop.style.left = Math.random() * 100 + "vw";
+      drop.style.animationDuration = (Math.random() * 0.5 + 0.5) + "s";
+      document.body.appendChild(drop);
+      setTimeout(() => drop.remove(), 1000);
+    }, 50);
+  }
+  function stopRain() { clearInterval(rainInterval); document.querySelectorAll('.rain-drop').forEach(e => e.remove()); }
+
+  document.getElementById("unlockBtn").onclick = () => {
+    const val = document.getElementById("vaultInput").value.toLowerCase().trim();
+    if(val === "yağmurlu") {
+      vaultScreen.classList.add("hidden"); finalScreen.classList.remove("hidden");
+      stopRain();
+      document.body.classList.remove("rainy-mode");
+      document.body.classList.add("party-mode");
+
+      startLanterns();
+      startFullConfetti();
+      setTimeout(typeWriter, 1000);
+    } else {
+      document.getElementById("errorMsg").style.display = "block";
+      document.getElementById("vaultInput").classList.add("shake");
+      setTimeout(()=>document.getElementById("vaultInput").classList.remove("shake"),500);
+    }
+  };
+
+  // --- FİNAL & DİLEK FENERLERİ ---
+  function startLanterns() {
+    setInterval(() => {
+      const lantern = document.createElement("div");
+      lantern.className = "lantern";
+      lantern.style.left = Math.random() * 100 + "vw";
+      lantern.style.animationDuration = (Math.random() * 5 + 10) + "s";
+      document.body.appendChild(lantern);
+      setTimeout(() => lantern.remove(), 15000);
+    }, 800);
+  }
+
+  let charIndex = 0;
+  function typeWriter() {
+    if (charIndex < myMessage.length) {
+      document.getElementById("typewriterText").innerHTML += myMessage.charAt(charIndex) === "\n" ? "<br>" : myMessage.charAt(charIndex);
+      charIndex++; setTimeout(typeWriter, 50);
+    }
+  }
+
+  function startFullConfetti() {
+    // 1. Basit CSS Konfeti (Yedek)
+    const style = document.createElement("style");
+    style.innerText = `@keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }`;
+    document.head.appendChild(style);
+
+    // 2. Gelişmiş Canvas Konfeti (Eğer Kütüphane Yüklüyse)
+    if(typeof confetti === 'function') {
+      var duration = 5000;
+      var end = Date.now() + duration;
+      (function frame() {
+        confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 } });
+        confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 } });
+        if (Date.now() < end) requestAnimationFrame(frame);
+      }());
+    }
+
+    // CSS Konfetileri Devam Etsin
+    setInterval(() => {
+      const el = document.createElement("div");
+      el.innerText = ["🎉","🎂","🎈","🎁"][Math.floor(Math.random()*4)];
+      el.style.position = "fixed"; el.style.left = Math.random()*100+"vw"; el.style.top = "-50px";
+      el.style.fontSize = (Math.random()*20+20)+"px";
+      el.style.animation = `fall ${Math.random()*3+2}s linear forwards`;
+      el.style.zIndex = "999"; document.body.appendChild(el);
+      setTimeout(() => el.remove(), 5000);
+    }, 200);
+  }
+
+  function toggleMusic() {
+    if (bgMusic.paused) bgMusic.play(); else bgMusic.pause();
+  }
+</script>
+</body>
+</html>
